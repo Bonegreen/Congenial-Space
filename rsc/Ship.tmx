@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" tiledversion="1.1.5" orientation="orthogonal" renderorder="right-down" width="22" height="16" tilewidth="32" tileheight="32" infinite="0" nextobjectid="1">
+ <tileset firstgid="1" name="Background_Tileset" tilewidth="32" tileheight="32" tilecount="100" columns="10">
+  <image source="Background_Tileset.png" width="320" height="320"/>
+  <tile id="12">
+   <properties>
+    <property name="blocked" value="true"/>
+   </properties>
+  </tile>
+  <tile id="13">
+   <properties>
+    <property name="blocked" value="true"/>
+   </properties>
+  </tile>
+  <tile id="14">
+   <properties>
+    <property name="blocked" value="true"/>
+   </properties>
+  </tile>
+  <tile id="15">
+   <properties>
+    <property name="blocked" value="true"/>
+   </properties>
+  </tile>
+  <tile id="16">
+   <properties>
+    <property name="blocked" value="true"/>
+   </properties>
+  </tile>
+  <tile id="17">
+   <properties>
+    <property name="blocked" value="true"/>
+   </properties>
+  </tile>
+  <tile id="18">
+   <properties>
+    <property name="blocked" value="true"/>
+   </properties>
+  </tile>
+  <tile id="19">
+   <properties>
+    <property name="blocked" value="true"/>
+   </properties>
+  </tile>
+  <tile id="20">
+   <properties>
+    <property name="blocked" value="true"/>
+   </properties>
+  </tile>
+ </tileset>
+ <layer name="Tile Layer 1" width="22" height="16" offsetx="12" offsety="-7">
+  <data encoding="base64" compression="gzip">
+   H4sIAAAAAAAACu2RWQrAMAhEc4DSdN+X+9+ykz8pGSOBQikdeF/qE9G5Z9OAUqHPdA6gUKjJfm1flXBK7713VtwW7woOsEdqzG3xWu95i3cDJ1gitRG0mV72N+YM6cBk9IZeL2BO6fYKqfk/38gFoun6IoAFAAA=
+  </data>
+ </layer>
+</map>

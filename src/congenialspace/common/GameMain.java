@@ -37,6 +37,7 @@ public class GameMain extends BasicGameState{
 	int turn = 0;
 	float Currentx;
 	float Currenty;
+	int AttackDir = 3;
 	
 	Sound error;
 	
@@ -105,9 +106,35 @@ public class GameMain extends BasicGameState{
 			g.fill(Path[4]);
 		}
 		
+		//Render an attack marker in the facing direction
+		if(attack) {
+			switch (AttackDir) {
+			case 0:
+				g.fillRect(Team[turn].Posx, Team[turn].Posy + 32, 32, 32);
+				break;
+			case 1:
+				g.fillRect(Team[turn].Posx, Team[turn].Posy - 32, 32, 32);
+				break;
+			case 2:
+				g.fillRect(Team[turn].Posx + 32, Team[turn].Posy, 32, 32);
+				break;
+			case 3:
+				g.fillRect(Team[turn].Posx -32, Team[turn].Posy, 32, 32);
+				break;
+			default:
+				break;
+			}
+		}
+		
 		//Display remaining moves for selected player
 		g.setColor(Color.white);
 		g.drawString("Moves: " + (Team[turn].Speed - Speed), 500, 500);
+		
+		if(attack) {
+			g.drawString("Mode: Attack", 500, 530);
+		}else {
+			g.drawString("Mode: Move", 500, 530);
+		}
 	}
 
 	@Override
@@ -125,86 +152,87 @@ public class GameMain extends BasicGameState{
 		
 		if (input.isKeyPressed(Input.KEY_DOWN))
 		{
-		    if(Speed < Team[turn].Speed && !isBlocked(Path[Speed].getX(), Path[Speed].getY() + 32)){
-		    	Move[Speed] = 0;
-		    	Path[Speed+1] = new Rectangle(Path[Speed].getX(), Path[Speed].getY() + 32, 32, 32);
-		     	Currentx = Path[Speed+1].getX();
-		    	Currenty = Path[Speed+1].getY();
-		    	Speed++;
-		    }else{
-				error.play();
+			if(!attack) {
+				if(Speed < Team[turn].Speed && !isBlocked(Path[Speed].getX(), Path[Speed].getY() + 32)){
+			    	Move[Speed] = 0;
+			    	Path[Speed+1] = new Rectangle(Path[Speed].getX(), Path[Speed].getY() + 32, 32, 32);
+			     	Currentx = Path[Speed+1].getX();
+			    	Currenty = Path[Speed+1].getY();
+			    	Speed++;
+			    }else{
+					error.play();
+				}
+			}else {
+				AttackDir = 0;
 			}
 		}
 		
 		if (input.isKeyPressed(Input.KEY_UP))
 		{
-			if(Speed < Team[turn].Speed && !isBlocked(Path[Speed].getX(), Path[Speed].getY() - 32)){
-				Move[Speed] = 1;
-				Path[Speed+1] = new Rectangle(Path[Speed].getX(), Path[Speed].getY() - 32, 32, 32);
-				Currentx = Path[Speed+1].getX();
-				Currenty = Path[Speed+1].getY();
-				Speed++;
-		    }else{
-				error.play();
+			if(!attack) {
+				if(Speed < Team[turn].Speed && !isBlocked(Path[Speed].getX(), Path[Speed].getY() - 32)){
+					Move[Speed] = 1;
+					Path[Speed+1] = new Rectangle(Path[Speed].getX(), Path[Speed].getY() - 32, 32, 32);
+					Currentx = Path[Speed+1].getX();
+					Currenty = Path[Speed+1].getY();
+					Speed++;
+			    }else{
+					error.play();
+				}
+			}else {
+				AttackDir = 1;
 			}
 		}
 		
 		if (input.isKeyPressed(Input.KEY_RIGHT))
 		{
-			if(Speed < Team[turn].Speed && !isBlocked(Path[Speed].getX() +32, Path[Speed].getY())){
-				Move[Speed] = 2;
-				Path[Speed+1] = new Rectangle(Path[Speed].getX() +32, Path[Speed].getY(), 32, 32);
-				Currentx = Path[Speed+1].getX();
-				Currenty = Path[Speed+1].getY();
-				Speed++;
-		    }else{
-				error.play();
+			if(!attack) {
+				if(Speed < Team[turn].Speed && !isBlocked(Path[Speed].getX() +32, Path[Speed].getY())){
+					Move[Speed] = 2;
+					Path[Speed+1] = new Rectangle(Path[Speed].getX() +32, Path[Speed].getY(), 32, 32);
+					Currentx = Path[Speed+1].getX();
+					Currenty = Path[Speed+1].getY();
+					Speed++;
+			    }else{
+					error.play();
+				}
+			}else {
+				AttackDir = 2;
 			}
 		}
 		
 		if (input.isKeyPressed(Input.KEY_LEFT))
 		{
-			if(Speed < Team[turn].Speed && !isBlocked(Path[Speed].getX() -32, Path[Speed].getY())){
-				Move[Speed] = 3;
-				Path[Speed+1] = new Rectangle(Path[Speed].getX() -32, Path[Speed].getY(), 32, 32);
-				Currentx = Path[Speed+1].getX();
-				Currenty = Path[Speed+1].getY();
-				Speed++;
-		    }else{
-				error.play();
+			if(!attack) {
+				if(Speed < Team[turn].Speed && !isBlocked(Path[Speed].getX() -32, Path[Speed].getY())){
+					Move[Speed] = 3;
+					Path[Speed+1] = new Rectangle(Path[Speed].getX() -32, Path[Speed].getY(), 32, 32);
+					Currentx = Path[Speed+1].getX();
+					Currenty = Path[Speed+1].getY();
+					Speed++;
+			    }else{
+					error.play();
+				}
+			}else {
+				AttackDir = 3;
 			}
 		}
 		
 		if (input.isKeyPressed(Input.KEY_ENTER))
 		{
-			if(moveCheck(Currentx, Currenty)) {
-			
-				System.out.println("Move: "+ Move[0] + "Speed:" + Speed);
-				Team[turn].move(Move);
-					
-				if(turn < Team.length - 1) {
-					turn++;
-				}else {
-					turn = 0;
-				}
-			}else{
-				error.play();
+			if(attack) {
+				Team[turn].Attack(AttackDir, Beam);
+			}else {
+				Move();
 			}
-			
-			for(int j = 0; j < 6; j++) {
-				Move[j] = 4;
-			}
-					
-			Path[0] = new Rectangle(Team[turn].Posx, Team[turn].Posy, 32, 32);
-			Path[1] = null;
-			Path[2] = null;
-			Path[3] = null;
-			Path[4] = null;
-			Speed = 0;
 		}
 		
 		if(input.isKeyPressed(Input.KEY_SPACE)) {
-			attack = true;
+			if(attack) {
+				attack = false;
+			}else {
+				attack = true;
+			}
 		}
 		
 		if (input.isKeyDown(Input.KEY_ESCAPE))
@@ -226,6 +254,33 @@ public class GameMain extends BasicGameState{
 		}
 		
 		return true;	
+	}
+	
+	private void Move() {
+		if(moveCheck(Currentx, Currenty)) {
+			
+			System.out.println("Move: "+ Move[0] + "Speed:" + Speed);
+			Team[turn].move(Move);
+				
+			if(turn < Team.length - 1) {
+				turn++;
+			}else {
+				turn = 0;
+			}
+		}else{
+			error.play();
+		}
+		
+		for(int j = 0; j < 6; j++) {
+			Move[j] = 4;
+		}
+				
+		Path[0] = new Rectangle(Team[turn].Posx, Team[turn].Posy, 32, 32);
+		Path[1] = null;
+		Path[2] = null;
+		Path[3] = null;
+		Path[4] = null;
+		Speed = 0;
 	}
 	
 	private void setMapTerrain() {

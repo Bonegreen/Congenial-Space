@@ -77,4 +77,26 @@ public class Character extends Actor{
 		}
 	}
 	
+	public void Attack(int Dir, Turret[] turret) {
+			CheckTarget(Dir, turret);
+	}
+	
+	public boolean CheckTarget(int Dir, Turret[] turret) {
+		int x, y;
+		for(int i = 1; i < 4; i++) {
+			x = Posx + 32*i;
+			for(int k = 0; k < turret.length; k++) {
+				System.out.println("x: " + x + " kx: " + turret[k].Posx);
+				System.out.println("y: " + Posy + " ky: " + turret[k].Posy);
+				if(x == turret[k].Posx && Posy == turret[k].Posy) {
+					System.out.println("Shot A Dude");
+					return true;
+				}
+			}
+		}
+		System.out.println("Miss");
+		return false;
+		
+	}
+	
 }
