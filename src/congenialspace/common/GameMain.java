@@ -1,6 +1,7 @@
 package congenialspace.common;
 
 import java.io.FileNotFoundException;
+import java.util.LinkedList;
 
 import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
@@ -28,9 +29,12 @@ public class GameMain extends BasicGameState{
 	Character Team1;
 	Character Team2;
 	Character Team3;
-	Character Team[] = {Team1, Team2, Team3};
+	LinkedList<Character> Team;
 	
-	Turret [] Beam;
+	LinkedList<Turret> Beam;
+	
+	//TODO
+	Alien alien;
 	
 	int Speed = 0;
 	int Move[] = {4,4,4,4,4,4};
@@ -57,14 +61,15 @@ public class GameMain extends BasicGameState{
 		
 		Spaceship = new TiledMap("rsc/Ship.tmx");
 		blocked = new boolean[Spaceship.getWidth()][Spaceship.getHeight()];
+		
+		Team = new LinkedList<Character>();
 			
-		Team1 = new Character(64, 64, 4, 2, 1);
-		Team2 = new Character(64, 128, 3, 2, 2);
-		Team3 = new Character(128, 128, 4, 2, 3);
-		Team[0] = Team1;
-		Team[1] = Team2;
-		Team[2] = Team3;
-		Path[0] = new Rectangle(Team[0].Posx, Team[0].Posy, 32, 32);
+		Team1 = new Character(2, 2, 4, 2, 1);
+		Team2 = new Character(2, 4, 3, 2, 2);
+		Team3 = new Character(4, 4, 4, 2, 3);
+		Team.add(Team1);
+		//Team.add(Team2);
+		Path[0] = new Rectangle(Team.get(0).Posx*tileWidth, Team.get(0).Posy*tileWidth, 32, 32);
 		error = new Sound("rsc/error.ogg");
 		
 		try {
@@ -72,6 +77,15 @@ public class GameMain extends BasicGameState{
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
+		
+		//TODO
+		int[] a = new int[5];
+		a[0] = 16;
+		a[1] = 5;
+		a[2] = 4;
+		a[3] = 5;
+		a[4] = 0;
+		alien = new Alien(a, blocked);
 		
 		//getDisplayNodes(gc);
 		
@@ -84,14 +98,18 @@ public class GameMain extends BasicGameState{
 		g.fillRect(0, 0, 800, 600);
 		Spaceship.render(0, 0);
 		
-		for(int i = 0; i < Team.length; i++) {
-			Team[i].render(gc, g);
+		//Render Allies and Enemies
+		for(int i = 0; i < Team.size(); i++) {
+			Team.get(i).render(gc, g);
 		}
 		
-		for(int i = 0; i < Beam.length; i++) {
-			Beam[i].render(gc, g);
+		for(int i = 0; i < Beam.size(); i++) {
+			Beam.get(i).render(gc, g);
 		}
 		
+		alien.render(gc, g);
+		
+		//Render Move Path
 		g.setColor(new Color(255, 0, 0, 150));
 		if(Path[1] != null) {
 			g.fill(Path[1]);
@@ -110,16 +128,16 @@ public class GameMain extends BasicGameState{
 		if(attack) {
 			switch (AttackDir) {
 			case 0:
-				g.fillRect(Team[turn].Posx, Team[turn].Posy + 32, 32, 32);
+				g.fillRect(Team.get(turn).Posx*tileWidth, Team.get(turn).Posy*tileWidth + tileWidth, 32, 32);
 				break;
 			case 1:
-				g.fillRect(Team[turn].Posx, Team[turn].Posy - 32, 32, 32);
+				g.fillRect(Team.get(turn).Posx*tileWidth, Team.get(turn).Posy*tileWidth - tileWidth, 32, 32);
 				break;
 			case 2:
-				g.fillRect(Team[turn].Posx + 32, Team[turn].Posy, 32, 32);
+				g.fillRect(Team.get(turn).Posx*tileWidth + tileWidth, Team.get(turn).Posy*tileWidth, 32, 32);
 				break;
 			case 3:
-				g.fillRect(Team[turn].Posx -32, Team[turn].Posy, 32, 32);
+				g.fillRect(Team.get(turn).Posx*tileWidth -tileWidth, Team.get(turn).Posy*tileWidth, 32, 32);
 				break;
 			default:
 				break;
@@ -128,18 +146,25 @@ public class GameMain extends BasicGameState{
 		
 		//Display remaining moves for selected player
 		g.setColor(Color.white);
-		g.drawString("Moves: " + (Team[turn].Speed - Speed), 500, 500);
+		
+		if(Team.size() > 0) {
+			g.drawString("Moves: " + (Team.get(turn).Speed - Speed), 500, 500);
+		}
 		
 		if(attack) {
 			g.drawString("Mode: Attack", 500, 530);
 		}else {
 			g.drawString("Mode: Move", 500, 530);
 		}
+		
+		g.drawString("Turn " + (turn), 500, 515);
 	}
 
 	@Override
-	public void update(GameContainer c, StateBasedGame s, int t) throws SlickException {
+	public void update(GameContainer c, StateBasedGame s, int delta) throws SlickException {
 		Input input = c.getInput();
+		
+		//Test click input
 		int x;
 		int y;
 			
@@ -149,11 +174,11 @@ public class GameMain extends BasicGameState{
 			checkButton(x,y);
 		}
 		
-		
+		//Keyboard Input
 		if (input.isKeyPressed(Input.KEY_DOWN))
 		{
 			if(!attack) {
-				if(Speed < Team[turn].Speed && !isBlocked(Path[Speed].getX(), Path[Speed].getY() + 32)){
+				if(Speed < Team.get(turn).Speed && !isBlocked(Path[Speed].getX(), Path[Speed].getY() + 32)){
 			    	Move[Speed] = 0;
 			    	Path[Speed+1] = new Rectangle(Path[Speed].getX(), Path[Speed].getY() + 32, 32, 32);
 			     	Currentx = Path[Speed+1].getX();
@@ -170,7 +195,7 @@ public class GameMain extends BasicGameState{
 		if (input.isKeyPressed(Input.KEY_UP))
 		{
 			if(!attack) {
-				if(Speed < Team[turn].Speed && !isBlocked(Path[Speed].getX(), Path[Speed].getY() - 32)){
+				if(Speed < Team.get(turn).Speed && !isBlocked(Path[Speed].getX(), Path[Speed].getY() - 32)){
 					Move[Speed] = 1;
 					Path[Speed+1] = new Rectangle(Path[Speed].getX(), Path[Speed].getY() - 32, 32, 32);
 					Currentx = Path[Speed+1].getX();
@@ -187,7 +212,7 @@ public class GameMain extends BasicGameState{
 		if (input.isKeyPressed(Input.KEY_RIGHT))
 		{
 			if(!attack) {
-				if(Speed < Team[turn].Speed && !isBlocked(Path[Speed].getX() +32, Path[Speed].getY())){
+				if(Speed < Team.get(turn).Speed && !isBlocked(Path[Speed].getX() +32, Path[Speed].getY())){
 					Move[Speed] = 2;
 					Path[Speed+1] = new Rectangle(Path[Speed].getX() +32, Path[Speed].getY(), 32, 32);
 					Currentx = Path[Speed+1].getX();
@@ -204,7 +229,7 @@ public class GameMain extends BasicGameState{
 		if (input.isKeyPressed(Input.KEY_LEFT))
 		{
 			if(!attack) {
-				if(Speed < Team[turn].Speed && !isBlocked(Path[Speed].getX() -32, Path[Speed].getY())){
+				if(Speed < Team.get(turn).Speed && !isBlocked(Path[Speed].getX() -32, Path[Speed].getY())){
 					Move[Speed] = 3;
 					Path[Speed+1] = new Rectangle(Path[Speed].getX() -32, Path[Speed].getY(), 32, 32);
 					Currentx = Path[Speed+1].getX();
@@ -221,10 +246,18 @@ public class GameMain extends BasicGameState{
 		if (input.isKeyPressed(Input.KEY_ENTER))
 		{
 			if(attack) {
-				Team[turn].Attack(AttackDir, Beam);
+				Team.get(turn).Attack(AttackDir, Beam);
 			}else {
-				Move();
+				Move(delta);
 			}
+			
+			turn = 0;
+			
+			for(int i = 0; i < Beam.size(); i++) {
+				Beam.get(i).attack(Team);
+			}
+			
+			alien.move(Team, blocked);
 		}
 		
 		if(input.isKeyPressed(Input.KEY_SPACE)) {
@@ -239,6 +272,15 @@ public class GameMain extends BasicGameState{
 		{
 		    c.exit();
 		}
+		
+		if (input.isKeyPressed(Input.KEY_N))
+		{
+			if(turn < Team.size() - 1) {
+				turn++;
+			}else {
+				turn = 0;
+			}
+		}
 	}
 
 	private void checkButton(int bx, int by) {
@@ -247,8 +289,8 @@ public class GameMain extends BasicGameState{
 	}
 	
 	private boolean moveCheck(float x, float y) {
-		for(int i = 0; i < Team.length; i++){
-			if(Team[i].Posx == x && Team[i].Posy == y) {
+		for(int i = 0; i < Team.size(); i++){
+			if(Team.get(i).Posx == x && Team.get(i).Posy == y) {
 				return false;
 			}
 		}
@@ -256,13 +298,13 @@ public class GameMain extends BasicGameState{
 		return true;	
 	}
 	
-	private void Move() {
-		if(moveCheck(Currentx, Currenty)) {
+	private void Move(int delta) {
+		if(moveCheck(Currentx/tileWidth, Currenty/tileWidth)) {
 			
 			System.out.println("Move: "+ Move[0] + "Speed:" + Speed);
-			Team[turn].move(Move);
+			Team.get(turn).move(Move);
 				
-			if(turn < Team.length - 1) {
+			if(turn < Team.size() - 1) {
 				turn++;
 			}else {
 				turn = 0;
@@ -275,7 +317,7 @@ public class GameMain extends BasicGameState{
 			Move[j] = 4;
 		}
 				
-		Path[0] = new Rectangle(Team[turn].Posx, Team[turn].Posy, 32, 32);
+		Path[0] = new Rectangle(Team.get(turn).Posx*tileWidth, Team.get(turn).Posy*tileWidth, 32, 32);
 		Path[1] = null;
 		Path[2] = null;
 		Path[3] = null;

@@ -1,5 +1,7 @@
 package congenialspace.common;
 
+import java.util.LinkedList;
+
 import org.newdawn.slick.Animation;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
@@ -18,7 +20,11 @@ public class Character extends Actor{
 	Animation Right;
 	Animation Left;
 	
+	int tileWidth = 32;
+	
 	Animation Players[] = {Foward, Back, Left, Right};
+	
+	private boolean isMoving = false;
 	
 	public Character(int Posx, int Posy, int speed, int hp, int id) throws SlickException{
 		super(Posx, Posy, speed, hp, id);
@@ -51,51 +57,108 @@ public class Character extends Actor{
 	
 	public void render(GameContainer gc, Graphics g) throws SlickException 
 	{				
-		g.drawImage(Idle, Posx, Posy);
-		//g.drawAnimation(Players[0], Posx, Posy);
+		if(isMoving) {
+			g.drawAnimation(Players[0], Posx, Posy);
+		}else {
+			g.drawImage(Idle, Posx*tileWidth, Posy*tileWidth);
+		}
 	}
 	
 	public void move(int Move[]){
+		
+		isMoving = true;
+		//Take the list of moves and render slower
+		
 		for(int i = 0; i < Speed; i++) {
 			switch (Move[i]) {
 				case 0:
-					Posy += 32;
+					Posy += 1;
 					break;
 				case 1:
-					Posy -= 32;
+					Posy -= 1;
 					break;
 				case 2:
-					Posx += 32;
+					Posx += 1;
 					break;
 				case 3:
-					Posx -= 32;
+					Posx -= 1;
 					break;
 				default:
 					break;
-			}
-						
+			}		
 		}
+		
+		isMoving = false;
 	}
 	
-	public void Attack(int Dir, Turret[] turret) {
-			CheckTarget(Dir, turret);
+	public void Attack(int Dir, LinkedList<Turret> beam) {
+			CheckTarget(Dir, beam);
 	}
 	
-	public boolean CheckTarget(int Dir, Turret[] turret) {
+	public void CheckTarget(int Dir, LinkedList<Turret> beam) {
 		int x, y;
-		for(int i = 1; i < 4; i++) {
-			x = Posx + 32*i;
-			for(int k = 0; k < turret.length; k++) {
-				System.out.println("x: " + x + " kx: " + turret[k].Posx);
-				System.out.println("y: " + Posy + " ky: " + turret[k].Posy);
-				if(x == turret[k].Posx && Posy == turret[k].Posy) {
-					System.out.println("Shot A Dude");
-					return true;
+		switch (Dir) {
+		case 0://Down
+			for(int i = 1; i < 4; i++) {
+				y = Posy + i;
+				for(int k = 0; k < beam.size(); k++) {
+					System.out.println("x: " + y + " kx: " + beam.get(k).Posx);
+					System.out.println("y: " + Posy + " ky: " + beam.get(k).Posy);
+					if(Posx == beam.get(k).Posx && y == beam.get(k).Posy) {
+						beam.remove(k);
+						System.out.println("Shot A Dude");
+						return;
+					}
 				}
 			}
-		}
+			break;
+		case 1://Up
+			for(int i = 1; i < 4; i++) {
+				y = Posy - i;
+				for(int k = 0; k < beam.size(); k++) {
+					System.out.println("x: " + y + " kx: " + beam.get(k).Posx);
+					System.out.println("y: " + Posy + " ky: " + beam.get(k).Posy);
+					if(Posx == beam.get(k).Posx && y == beam.get(k).Posy) {
+						beam.remove(k);
+						System.out.println("Shot A Dude");
+						return;
+					}
+				}
+			}
+			break;
+		case 2://Right
+			for(int i = 1; i < 4; i++) {
+				x = Posx + i;
+				for(int k = 0; k < beam.size(); k++) {
+					System.out.println("x: " + x + " kx: " + beam.get(k).Posx);
+					System.out.println("y: " + Posy + " ky: " + beam.get(k).Posy);
+					if(x == beam.get(k).Posx && Posy == beam.get(k).Posy) {
+						beam.remove(k);
+						System.out.println("Shot A Dude");
+						return;
+					}
+				}
+			}
+			break;
+		case 3://Left
+			for(int i = 1; i < 4; i++) {
+				x = Posx - i;
+				for(int k = 0; k < beam.size(); k++) {
+					System.out.println("x: " + x + " kx: " + beam.get(k).Posx);
+					System.out.println("y: " + Posy + " ky: " + beam.get(k).Posy);
+					if(x == beam.get(k).Posx && Posy == beam.get(k).Posy) {
+						beam.remove(k);
+						System.out.println("Shot A Dude");
+						return;
+					}
+				}
+			}
+			break;
+		default:
+			break;
+	}
 		System.out.println("Miss");
-		return false;
+		return;
 		
 	}
 	
