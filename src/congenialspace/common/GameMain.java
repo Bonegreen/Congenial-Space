@@ -68,7 +68,7 @@ public class GameMain extends BasicGameState{
 		Team2 = new Character(2, 4, 3, 2, 2);
 		Team3 = new Character(4, 4, 4, 2, 3);
 		Team.add(Team1);
-		//Team.add(Team2);
+		Team.add(Team2);
 		Path[0] = new Rectangle(Team.get(0).Posx*tileWidth, Team.get(0).Posy*tileWidth, 32, 32);
 		error = new Sound("rsc/error.ogg");
 		
@@ -97,7 +97,7 @@ public class GameMain extends BasicGameState{
 		g.setColor(Color.gray);
 		g.fillRect(0, 0, 800, 600);
 		Spaceship.render(0, 0);
-		
+				
 		//Render Allies and Enemies
 		for(int i = 0; i < Team.size(); i++) {
 			Team.get(i).render(gc, g);
@@ -245,19 +245,40 @@ public class GameMain extends BasicGameState{
 		
 		if (input.isKeyPressed(Input.KEY_ENTER))
 		{
+			
 			if(attack) {
+				
 				Team.get(turn).Attack(AttackDir, Beam);
+				attack = false;
+				
+				if(turn < Team.size() - 1) {
+					turn++;
+				}else {
+					turn = 0;
+					for(int i = 0; i < Beam.size(); i++) {
+						Beam.get(i).attack(Team);
+					}
+			
+					alien.move(Team, blocked);
+			
+					for(int i = 0; i < Team.size(); i++) {
+						System.out.println("x:" + Team.get(i).Posx + " " + alien.Posx);
+						System.out.println("y:" + Team.get(i).Posy + " " + alien.Posy);
+						if(alien.Posx == Team.get(i).Posx && alien.Posy == Team.get(i).Posy) {
+						Team.remove(i);
+						}
+					}
+				}
+				
+				Path[0] = new Rectangle(Team.get(turn).Posx*tileWidth, Team.get(turn).Posy*tileWidth, 32, 32);	
+				
 			}else {
+				
 				Move(delta);
+				attack = true;
 			}
 			
-			turn = 0;
-			
-			for(int i = 0; i < Beam.size(); i++) {
-				Beam.get(i).attack(Team);
-			}
-			
-			alien.move(Team, blocked);
+					
 		}
 		
 		if(input.isKeyPressed(Input.KEY_SPACE)) {
@@ -271,15 +292,6 @@ public class GameMain extends BasicGameState{
 		if (input.isKeyDown(Input.KEY_ESCAPE))
 		{
 		    c.exit();
-		}
-		
-		if (input.isKeyPressed(Input.KEY_N))
-		{
-			if(turn < Team.size() - 1) {
-				turn++;
-			}else {
-				turn = 0;
-			}
 		}
 	}
 
@@ -303,12 +315,7 @@ public class GameMain extends BasicGameState{
 			
 			System.out.println("Move: "+ Move[0] + "Speed:" + Speed);
 			Team.get(turn).move(Move);
-				
-			if(turn < Team.size() - 1) {
-				turn++;
-			}else {
-				turn = 0;
-			}
+			
 		}else{
 			error.play();
 		}
@@ -316,13 +323,12 @@ public class GameMain extends BasicGameState{
 		for(int j = 0; j < 6; j++) {
 			Move[j] = 4;
 		}
-				
-		Path[0] = new Rectangle(Team.get(turn).Posx*tileWidth, Team.get(turn).Posy*tileWidth, 32, 32);
+		
 		Path[1] = null;
 		Path[2] = null;
 		Path[3] = null;
 		Path[4] = null;
-		Speed = 0;
+		Speed = 0;		
 	}
 	
 	private void setMapTerrain() {

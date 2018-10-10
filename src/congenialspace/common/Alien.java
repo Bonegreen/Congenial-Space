@@ -16,7 +16,6 @@ public class Alien extends Actor {
 	SpriteSheet AlienSheet;
 	Image Idle;
 	int tileWidth = 32;
-	int x,y;
 	int speed;
 	
 	int pathLength = 0;
@@ -34,14 +33,16 @@ public class Alien extends Actor {
 	
 	int f1, f2 = 0;
 	
+	Character c = null;
+	
 	private static boolean[][] Terrain;
 
 	
 	public Alien(int[] Level, boolean[][] Terrain) throws SlickException {
 		super(Level[0], Level[1], Level[2], Level[3], Level[4]);
 		this.Terrain = Terrain;
-		this.x = Level[0];
-		this.y = Level[1];
+		this.Posx = Level[0];
+		this.Posy = Level[1];
 		this.speed = Level[2];
 		
 		AlienSheet = new SpriteSheet("rsc/Alien_Spritesheet.png", 32, 32);
@@ -54,7 +55,7 @@ public class Alien extends Actor {
 	}
 	
 	public void render(GameContainer gc, Graphics g) throws SlickException{
-		g.drawImage(Idle, x*tileWidth, y*tileWidth);
+		g.drawImage(Idle, Posx*tileWidth, Posy*tileWidth);
 		
 		
 		
@@ -81,11 +82,11 @@ public class Alien extends Actor {
 		//Open.add(Target);
 		System.out.println("Start");
 		
-		Current = new Node(new int[]{x, y});
+		Current = new Node(new int[]{Posx, Posy});
 		f2 = 0;
 		
 		Open.add(Current);
-		System.out.println("Current: " + Current.Loc[0] + " " + Current.Loc[1]);
+		//System.out.println("Current: " + Current.Loc[0] + " " + Current.Loc[1]);
 		
 		PathFind(Terrain);
 		
@@ -96,11 +97,10 @@ public class Alien extends Actor {
 		
 		Integer[] Distance = new  Integer[Chars.size()];
 		Integer[] DistanceMark = new  Integer[Chars.size()];
-		Character c = null;
 		
 		for(int i = 0; i < Chars.size(); i++) {
 			c = Chars.get(i);
-			Distance[i] = Math.abs(x - c.Posx) + Math.abs(y - c.Posy);
+			Distance[i] = Math.abs(Posx - c.Posx) + Math.abs(Posy - c.Posy);
 		}
 		
 		DistanceMark =  Distance;
@@ -120,13 +120,13 @@ public class Alien extends Actor {
 		
 		while(!Open.isEmpty()) {
 			
-			System.out.println("Run");
+			//System.out.println("Run");
 			
 			if(f2 != 0) {
 				Current = Open.get(0);
 			}
 			
-			System.out.println("OPEN: " + Open.size());
+			//System.out.println("OPEN: " + Open.size());
 			
 			for(int i = 0; i < Open.size(); i++) {
 				
@@ -141,7 +141,7 @@ public class Alien extends Actor {
 				if(f2 != 0) {
 					if(f1 < f2) {
 						Current = Open.get(i);
-						System.out.println(" " + temp);
+						//System.out.println(" " + temp);
 					}
 				}
 				
@@ -155,21 +155,21 @@ public class Alien extends Actor {
 			
 			if(CheckID(Current, Target)) {
 				//Path Found
-				System.out.println("Done!");
+				//System.out.println("Done!");
 				GetPath();
 				return;
 			}
 			
 			if(!CheckID(Open, Current)) {
 				Open.remove(Current);
-				System.out.println("REMOVE");
+				//System.out.println("REMOVE");
 			}
 			
 			Closed.add(Current);
 			
 			CreateNeighbours();
 						
-			System.out.println("NEIGH: " + Neighbours.size());
+			//System.out.println("NEIGH: " + Neighbours.size());
 
 			for(int i = 0; i < Neighbours.size(); i++) {
 				
@@ -188,7 +188,7 @@ public class Alien extends Actor {
 				
 				
 			}
-			System.out.println("END");
+			//System.out.println("END");
 		}
 	}
 	
@@ -245,7 +245,7 @@ public class Alien extends Actor {
 		while(Current != null) {
 			
 			Path.add(Current);
-			System.out.println("Path: " + Current.Loc[0] + " " + Current.Loc[1]);
+			//System.out.println("Path: " + Current.Loc[0] + " " + Current.Loc[1]);
 			pathLength += 1;
 		
 			Current = Current.Parent;
@@ -256,24 +256,22 @@ public class Alien extends Actor {
 		for(int t = 0; t < speed; t++) {
 			if(t < pathLength) {
 				int[] lot = i.next().Loc;
-				x = lot[0];
-				y = lot[1];
-			}
-			
-		}
-		
+				Posx = lot[0];
+				Posy = lot[1];
+			}	
+		}		
 	}
 
 	private int[] ADD(int[] Cur, int[] Dir) {
 		
-		System.out.println("Cur: " + Cur[0] + " " + Cur[1]);
+		//System.out.println("Cur: " + Cur[0] + " " + Cur[1]);
 		
 		int[] Add = new int[ArrayLength];
 		for(int i = 0; i < ArrayLength; i++) {
 			Add[i] = Cur[i] + Dir[i];
 		}		
 		
-		System.out.println("LOCA: " + Add[0] + " " + Add[1]);
+		//System.out.println("LOCA: " + Add[0] + " " + Add[1]);
 		return Add;
 	}
 	
