@@ -53,7 +53,7 @@ public class GameMenu extends BasicGameState{
 			switch (Selection) {
 			case 0:
 				input.clearKeyPressedRecord();
-				s.enterState(0);
+				s.enterState(3);
 				break;
 			case 1:
 				input.clearKeyPressedRecord();

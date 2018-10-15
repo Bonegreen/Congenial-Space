@@ -33,8 +33,7 @@ public class GameMain extends BasicGameState{
 	
 	LinkedList<Turret> Beam;
 	
-	//TODO
-	Alien alien;
+	LinkedList<Alien> Enemy;
 	
 	int Speed = 0;
 	int Move[] = {4,4,4,4,4,4};
@@ -51,6 +50,8 @@ public class GameMain extends BasicGameState{
 	
 	Level currentLevel = Level.LEVEL_1;
 	
+	boolean paused;
+	
 	public GameMain(int state){
         this.state = state;
     }
@@ -63,12 +64,16 @@ public class GameMain extends BasicGameState{
 		blocked = new boolean[Spaceship.getWidth()][Spaceship.getHeight()];
 		
 		Team = new LinkedList<Character>();
+		Enemy = new LinkedList<Alien>();
 			
-		Team1 = new Character(2, 2, 4, 2, 1);
-		Team2 = new Character(2, 4, 3, 2, 2);
-		Team3 = new Character(4, 4, 4, 2, 3);
+		Team1 = new Character(2, 2, 4, 2, 1, 5);
+		Team2 = new Character(2, 4, 3, 2, 2, 9);
+		Team3 = new Character(4, 4, 4, 2, 3, 10);
+		
 		Team.add(Team1);
 		Team.add(Team2);
+		Team.add(Team3);
+		
 		Path[0] = new Rectangle(Team.get(0).Posx*tileWidth, Team.get(0).Posy*tileWidth, 32, 32);
 		error = new Sound("rsc/error.ogg");
 		
@@ -85,7 +90,7 @@ public class GameMain extends BasicGameState{
 		a[2] = 4;
 		a[3] = 5;
 		a[4] = 0;
-		alien = new Alien(a, blocked);
+		Enemy.add(new Alien(a, blocked));
 		
 		//getDisplayNodes(gc);
 		
@@ -95,7 +100,7 @@ public class GameMain extends BasicGameState{
 	@Override
 	public void render(GameContainer gc, StateBasedGame s, Graphics g) throws SlickException {
 		g.setColor(Color.gray);
-		g.fillRect(0, 0, 800, 600);
+		g.fillRect(0, 0, 960, 640);
 		Spaceship.render(0, 0);
 				
 		//Render Allies and Enemies
@@ -107,9 +112,15 @@ public class GameMain extends BasicGameState{
 			Beam.get(i).render(gc, g);
 		}
 		
-		alien.render(gc, g);
-		
+		for(int i = 0; i < Enemy.size(); i++) {
+			Enemy.get(i).render(gc, g);
+		}		
 		//Render Move Path
+		g.setColor(new Color(255, 255, 0, 150));
+		if(Path[0] != null) {
+			g.draw(Path[0]);
+		}
+		
 		g.setColor(new Color(255, 0, 0, 150));
 		if(Path[1] != null) {
 			g.fill(Path[1]);
@@ -158,6 +169,11 @@ public class GameMain extends BasicGameState{
 		}
 		
 		g.drawString("Turn " + (turn), 500, 515);
+		g.drawString("Range: " + (Team.get(turn).Range), 500, 545);
+		
+		if(paused) {
+			g.drawString("Paused, Press ENTER to Exit", 300, 300);
+		}
 	}
 
 	@Override
@@ -245,10 +261,13 @@ public class GameMain extends BasicGameState{
 		
 		if (input.isKeyPressed(Input.KEY_ENTER))
 		{
+			if(paused) {
+			    c.exit();
+			}
 			
 			if(attack) {
 				
-				Team.get(turn).Attack(AttackDir, Beam);
+				Team.get(turn).Attack(AttackDir, Beam, Team, Enemy);
 				attack = false;
 				
 				if(turn < Team.size() - 1) {
@@ -259,15 +278,18 @@ public class GameMain extends BasicGameState{
 						Beam.get(i).attack(Team);
 					}
 			
-					alien.move(Team, blocked);
+					for(int i = 0; i < Enemy.size(); i++) {
+						Enemy.get(i).move(Team, blocked);
+					}
 			
-					for(int i = 0; i < Team.size(); i++) {
+					//TODO
+					/*for(int i = 0; i < Team.size(); i++) {
 						System.out.println("x:" + Team.get(i).Posx + " " + alien.Posx);
 						System.out.println("y:" + Team.get(i).Posy + " " + alien.Posy);
 						if(alien.Posx == Team.get(i).Posx && alien.Posy == Team.get(i).Posy) {
 						Team.remove(i);
 						}
-					}
+					}*/
 				}
 				
 				Path[0] = new Rectangle(Team.get(turn).Posx*tileWidth, Team.get(turn).Posy*tileWidth, 32, 32);	
@@ -278,9 +300,11 @@ public class GameMain extends BasicGameState{
 				attack = true;
 			}
 			
+			
 					
 		}
 		
+		//Skip the move for the player
 		if(input.isKeyPressed(Input.KEY_SPACE)) {
 			if(attack) {
 				attack = false;
@@ -289,9 +313,13 @@ public class GameMain extends BasicGameState{
 			}
 		}
 		
-		if (input.isKeyDown(Input.KEY_ESCAPE))
+		if (input.isKeyPressed(Input.KEY_ESCAPE))
 		{
-		    c.exit();
+			if(paused) {
+				paused = false;
+			}else {
+				paused = true;
+			}
 		}
 	}
 
@@ -324,6 +352,7 @@ public class GameMain extends BasicGameState{
 			Move[j] = 4;
 		}
 		
+		Path[0] = null;
 		Path[1] = null;
 		Path[2] = null;
 		Path[3] = null;

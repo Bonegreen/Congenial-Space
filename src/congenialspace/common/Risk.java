@@ -15,7 +15,7 @@ public class Risk extends StateBasedGame{
 	public static final int Game = 0;
 	public static final int Menu = 1;
 	public static final int Credits = 2;
-	public static final int Cutscene = 3;
+	public static final int Loadout = 3;
 	public static final int Options = 4;
 	public static final int MiniGame = 7;
 	
@@ -45,6 +45,7 @@ public class Risk extends StateBasedGame{
     	this.addState(new GameMain(Game));
     	this.addState(new GameCredits(Credits));
     	this.addState(new GameOptions(Options));
-}
+    	this.addState(new GameLoadout(Loadout));
+    }
  
 }

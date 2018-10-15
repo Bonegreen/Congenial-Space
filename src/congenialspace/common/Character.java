@@ -14,25 +14,39 @@ public class Character extends Actor{
 	SpriteSheet PlayerSheet;
 	
 	Image Idle;
+	Image img_Down;
+	Image img_Up;
+	Image img_Right;
+	Image img_Left;
+	
 	
 	Animation Foward;
 	Animation Back;
 	Animation Right;
 	Animation Left;
 	
+	int Range;
+	
 	int tileWidth = 32;
 	
 	Animation Players[] = {Foward, Back, Left, Right};
 	
 	private boolean isMoving = false;
-	
-	public Character(int Posx, int Posy, int speed, int hp, int id) throws SlickException{
+		
+	public Character(int Posx, int Posy, int speed, int hp, int id, int Range) throws SlickException{
 		super(Posx, Posy, speed, hp, id);
 		
 		PlayerSheet = new SpriteSheet("rsc/Player_Spritesheet.png", 32, 32);
 		
 		Idle = PlayerSheet.getSprite(id,0);
+		img_Down = PlayerSheet.getSprite(id,0);
+		img_Up = PlayerSheet.getSprite(id,3);
+		img_Right = PlayerSheet.getSprite(id,7);
+		img_Left = PlayerSheet.getSprite(id,10);
 		
+		
+		this.Range = Range;
+				
 		//Assign Player Animations from Spritesheet
 		int n = 0;//Animation Number
 				
@@ -73,15 +87,19 @@ public class Character extends Actor{
 			switch (Move[i]) {
 				case 0:
 					Posy += 1;
+					Idle = img_Down;
 					break;
 				case 1:
 					Posy -= 1;
+					Idle = img_Up;
 					break;
 				case 2:
 					Posx += 1;
+					Idle = img_Right;
 					break;
 				case 3:
 					Posx -= 1;
+					Idle = img_Left;
 					break;
 				default:
 					break;
@@ -91,67 +109,39 @@ public class Character extends Actor{
 		isMoving = false;
 	}
 	
-	public void Attack(int Dir, LinkedList<Turret> beam) {
-			CheckTarget(Dir, beam);
-	}
-	
-	public void CheckTarget(int Dir, LinkedList<Turret> beam) {
+	public void Attack(int Dir, LinkedList<Turret> beam, LinkedList<Character> character, LinkedList<Alien> alien) {
 		int x, y;
 		switch (Dir) {
 		case 0://Down
-			for(int i = 1; i < 4; i++) {
+			x = Posx;
+			for(int i = 1; i < Range; i++) {
 				y = Posy + i;
-				for(int k = 0; k < beam.size(); k++) {
-					System.out.println("x: " + y + " kx: " + beam.get(k).Posx);
-					System.out.println("y: " + Posy + " ky: " + beam.get(k).Posy);
-					if(Posx == beam.get(k).Posx && y == beam.get(k).Posy) {
-						beam.remove(k);
-						System.out.println("Shot A Dude");
-						return;
-					}
-				}
+				Idle = img_Down;
+				CheckTargets(beam, character, alien, x, y);
 			}
 			break;
 		case 1://Up
-			for(int i = 1; i < 4; i++) {
+			x = Posx;
+			for(int i = 1; i < Range; i++) {
 				y = Posy - i;
-				for(int k = 0; k < beam.size(); k++) {
-					System.out.println("x: " + y + " kx: " + beam.get(k).Posx);
-					System.out.println("y: " + Posy + " ky: " + beam.get(k).Posy);
-					if(Posx == beam.get(k).Posx && y == beam.get(k).Posy) {
-						beam.remove(k);
-						System.out.println("Shot A Dude");
-						return;
-					}
-				}
+				Idle = img_Up;
+				CheckTargets(beam, character, alien, x, y);
 			}
 			break;
 		case 2://Right
-			for(int i = 1; i < 4; i++) {
+			y = Posy;
+			Idle = img_Right;
+			for(int i = 1; i < Range; i++) {
 				x = Posx + i;
-				for(int k = 0; k < beam.size(); k++) {
-					System.out.println("x: " + x + " kx: " + beam.get(k).Posx);
-					System.out.println("y: " + Posy + " ky: " + beam.get(k).Posy);
-					if(x == beam.get(k).Posx && Posy == beam.get(k).Posy) {
-						beam.remove(k);
-						System.out.println("Shot A Dude");
-						return;
-					}
-				}
+				CheckTargets(beam, character, alien, x, y);
 			}
 			break;
 		case 3://Left
-			for(int i = 1; i < 4; i++) {
+			y = Posy;
+			for(int i = 1; i < Range; i++) {
 				x = Posx - i;
-				for(int k = 0; k < beam.size(); k++) {
-					System.out.println("x: " + x + " kx: " + beam.get(k).Posx);
-					System.out.println("y: " + Posy + " ky: " + beam.get(k).Posy);
-					if(x == beam.get(k).Posx && Posy == beam.get(k).Posy) {
-						beam.remove(k);
-						System.out.println("Shot A Dude");
-						return;
-					}
-				}
+				Idle = img_Left;
+				CheckTargets(beam, character, alien, x, y);
 			}
 			break;
 		default:
@@ -162,4 +152,32 @@ public class Character extends Actor{
 		
 	}
 	
+	private void CheckTargets(LinkedList<Turret> beam, LinkedList<Character> character, LinkedList<Alien> alien, int x, int y) {
+		int EnemyNumber = Integer.max(beam.size(), Integer.max(character.size(), alien.size()));
+		
+		//TODO Fix so only first enemy is killed
+		
+		for(int k = 0; k < EnemyNumber; k++) {
+			if(k < beam.size()) {
+				if(x == beam.get(k).Posx && y == beam.get(k).Posy) {
+					beam.remove(k);
+					break;
+				}
+			}
+			if(k < character.size()) {
+				if(x == character.get(k).Posx && y == character.get(k).Posy) {
+					character.remove(k);
+					break;
+				}
+			}
+			if(k < alien.size()) {
+				if(x == alien.get(k).Posx && y == alien.get(k).Posy) {
+					alien.remove(k);
+					break;
+				}
+			}
+		}
+		
+		return;
+	}
 }
